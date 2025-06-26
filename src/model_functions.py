@@ -2,7 +2,8 @@ import numpy as np
 from numba import njit
 from numpy.random import rand
 
-@njit()
+
+@njit
 def rk4(x,hesitancy, dxdt, dt, params):
     k1 = dxdt(x,hesitancy, params)
     k2 = dxdt(x + k1 / 2 * dt,hesitancy, params)
@@ -12,26 +13,17 @@ def rk4(x,hesitancy, dxdt, dt, params):
     xnext = x + 1 / 6 * dt * (k1 + 2 * k2 + 2 * k3 + k4)
     return xnext
 
-@njit()
-def run_model(x, T, hesitancy,dxdt, params, dt, discard_len,int_steps):
-    output=np.zeros((T+discard_len,x.size))
-    output[0]=x
-    for i in range(T+discard_len):
-        output[i+1] = run_step(output[i],hesitancy,dxdt,dt,int_steps,params)
-        hesitancy = hesitancy.mcmv(output[i+1,6],output[i+1,7],output[i+1,2],output[i+1,3]) #D_n,D_v,I_n,I_v
-    return output[discard_len:]
-
 
 @njit()
 def run_step(x,hesitancy,dxdt,dt,int_steps,params):
     for i in range(int_steps):
         x = rk4(x,hesitancy, dxdt, dt, params)
     return x
-
+#params=[alpha,beta_v,beta_n,p_v,p_n,v0]
 @njit()
 def SIR_dxdt(x, hesitancy,params):
-    return np.array([-params[2]*x[0]*(x[2]+x[3])-hesitancy.global_hesitancy()*params[5]*x[0],
-                     -params[1]*x[1]*(x[2]+x[3])+hesitancy.global_hesitancy()*params[5]*x[0],
+    return np.array([-params[2]*x[0]*(x[2]+x[3])-hesitancy*params[5]*x[0],
+                     -params[1]*x[1]*(x[2]+x[3])+hesitancy*params[5]*x[0],
                      params[2]*x[0]*(x[2]+x[3])-params[0]*x[2],
                      params[1]*x[1]*(x[2]+x[3])-params[0]*x[3],
                      params[0]*(1-params[4])*x[2],
