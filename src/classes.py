@@ -3,7 +3,7 @@ import numpy as np
 from numba import njit
 
 class SIR_vaccination():
-    def __init__(self, hesitancy,alpha,beta_v,beta_n,p_v,p_n,v0,dt=0.01, int_steps=10, ic=np.array([]), ic_seed=0):
+    def __init__(self, hesitancy,alpha,beta_v,beta_n,p_v,p_n,v0,dt=0.01, int_steps=700, ic=np.array([]), ic_seed=0):
         self.params = np.array([alpha,beta_v,beta_n,p_v,p_n,v0])
         self.dxdt = SIR_dxdt
         self.hesitancy=hesitancy
